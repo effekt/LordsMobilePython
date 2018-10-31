@@ -3,11 +3,13 @@ from mss import mss
 from PIL import Image
 import numpy as np
 import time
+from window import Window
 
+window = Window()
 
 frame = None
 screen = mss()
-monitor = {'top': 0, 'left': 0, 'width': 1920, 'height': 1080}
+monitor = {'top': 0, 'left': 0, 'width': window.game['w'], 'height': window.game['h']}
 
 
 def convert_rgb_to_bgr(img):
@@ -24,7 +26,8 @@ def take_screenshot():
 
 
 def canny_image(img_grayscale, threshold=0.9):
-    canny = cv2.Canny(img_grayscale, 25, 250)
+    # canny = cv2.Canny(img_grayscale, 25, 250)
+    ret, canny = cv2.threshold(img_grayscale, 150, 255, cv2.THRESH_BINARY)
     cv2.imwrite(str(time.time()) + '.png', canny)
 
 

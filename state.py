@@ -28,7 +28,7 @@ class State:
             self.vision.refresh_frame()
         if self.vision.is_visible('kingdom', threshold=0.6):
             self.state = 'turf'
-        elif self.vision.is_visible('turf'):
+        elif self.vision.is_visible('turf', threshold=0.6):
             self.state = 'kingdom'
         else:
             self.state = 'unknown'
@@ -45,7 +45,7 @@ class State:
 
     def to_kingdom(self):
         if self.state == 'turf':
-            kingdom_matches = self.vision.find_template('kingdom')
+            kingdom_matches = self.vision.find_template('kingdom', threshold=0.6)
             self.controller.click_object(kingdom_matches)
             util.log('Moved to Kingdom.')
             self.state = 'kingdom'

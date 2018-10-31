@@ -3,13 +3,14 @@ from mss import mss
 from PIL import Image
 import numpy as np
 from window import Window
+from matplotlib import pyplot as plt
 
 window = Window()
 
 
 frame = None
 screen = mss()
-monitor = {'top': 0, 'left': 0, 'width': 1920, 'height': 1080}
+monitor = {'top': 0, 'left': 0, 'width': window.game['w'], 'height': window.game['h']}
 
 
 def convert_rgb_to_bgr(img):
@@ -26,29 +27,21 @@ def take_screenshot():
 
 
 def match_template(img_grayscale, template, threshold=0.5):
-    canny = cv2.Canny(img_grayscale, 25, 250)
+    w, h = template.shape[::-1]
+    ret, canny = cv2.threshold(img_grayscale, 150, 255, cv2.THRESH_BINARY)
     res = cv2.matchTemplate(canny, template, cv2.TM_CCOEFF_NORMED)
     matches = np.where(res >= threshold)
-    i = 0
-    while i < len(matches[0]):
-        if matches[1][i] < window.game['x1'] or matches[1][i] > window.game['x2'] or \
-                matches[0][i] < window.game['y1'] or matches[0][i] > window.game['y2']:
-            matches = np.array([np.delete(matches[0], i), np.delete(matches[1], i)])
-        else:
-            i += 1
     print(matches)
-    return np.array([np.asarray(matches[0]), np.asarray(matches[1])])
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    print(max_val)
+    print(max_loc)
+    bottom_right = (max_loc[0] + w, max_loc[1] + h)
+    # cv2.rectangle(canny, max_loc, bottom_right, 0, 2)
+    cv2.rectangle(canny, max_loc, bottom_right, 255, 2)
+    cv2.imshow("Detection", canny)
+    cv2.waitKey(0)
+    # return np.array([np.asarray(matches[0]), np.asarray(matches[1])])
 
 
-asset = cv2.imread('assets/img/static_turf_statue.png', 0)
-match_template(take_screenshot(), asset, 0.2)
-
-# asset = cv2.imread('assets/img/res_field_1.png', 0) threshold = 0.45
-# asset = cv2.imread('assets/img/turf.png', 0) thr = 0.9
-# asset = cv2.imread('assets/img/res_ore.png', 0) thresh = 0.45
-# asset = cv2.imread('assets/img/res_rocks.png', 0) thresh = 0.45
-# asset = cv2.imread('assets/img/screen_close.png', 0) thresh = 0.5
-# asset = cv2.imread('assets/img/res_wood.png', 0) thresh = 0.6
-# asset = cv2.imread('assets/img/res_gold.png', 0) thresh = 0.5
-# asset = cv2.imread('assets/img/help.png', 0) thresh = 0.8
-# asset = cv2.imread('assets/img/quest_collect.png', 0) thresh = 0.4
+asset = cv2.imread('assets/img/etc/kingdom.jpg', 0)
+match_template(take_screenshot(), asset, 0.85)

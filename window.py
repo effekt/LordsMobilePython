@@ -8,7 +8,6 @@ class Window:
         self.getWindow()
         win32gui.MoveWindow(self.hwnd, 0, 0, 1015, 582, True)
         self.window = win32gui.GetWindowRect(self.hwnd)
-        print(self.window)
         self.game = {
             'x1': self.window[0],
             'y1': self.window[1],
@@ -17,7 +16,6 @@ class Window:
             'w': self.window[2] - self.window[0],
             'h': self.window[3] - self.window[1]
         }
-        print(self.game)
 
     def isRealWindow(self, hWnd):
         if not win32gui.IsWindowVisible(hWnd):
