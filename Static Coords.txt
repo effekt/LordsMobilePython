@@ -1,0 +1,60 @@
+STATIC COORDS:
+
+TURF -------------------------------------------
+Screen 1 Buildings:
+	Castle: 805, 101
+	Barracks: 774, 179
+	Wall: 660, 180
+	Watchtower: 515, 165
+	Cargo Ship: 324, 433
+	Infirmary: 864, 160
+	Shelter: 669, 33
+
+Screen 2 Buildings:
+	Colliseum: 449, 358
+
+Tiles (Screen 1):
+	Tile1_1: 709, 285
+	Tile1_2: 827, 281
+	Tile1_3: 592, 406
+	Tile1_4: 722, 390
+
+Tiles (Screen 2):
+	Tile2_1: 565, 147
+	Tile2_2: 664, 154
+	Tile2_3: 513, 188
+	Tile2_4: 620, 240
+	Tile2_5: 761, 259
+	Tile2_6: 694, 325
+
+Statue (Clean State): 736, 149
+
+
+MENU BAR ---------------------------------------
+Guild: 455, 542
+Mail: 542, 542
+Quest: 620, 542
+Settings: 701, 542
+Bag: 782, 542
+Heroes: 866, 542
+Kingdom / Turf: 63, 535
+
+
+MENUS ------------------------------------------
+Hide Progress: 32, 186
+Hide Menu Bar: 952, 543
+
+
+BUILDING ---------------------------------------
+Upgrade: 740, 512
+
+
+CHEST ------------------------------------------
+Claim: 488, 401
+Chest: 873, 424
+
+
+GATHER -----------------------------------------
+Gather: 490, 309
+Auto-Assemble: 721, 358
+Start: 730, 465

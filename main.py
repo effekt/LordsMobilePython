@@ -5,7 +5,7 @@ from window import Window
 
 window = Window()
 vision = Vision(window)
-controller = Controller(window)
+controller = Controller(window, vision)
 game = Game(vision, controller, window)
 
 game.run()

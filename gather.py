@@ -1,5 +1,6 @@
 import time
 import util
+import statics
 
 
 class Gather:
@@ -8,13 +9,31 @@ class Gather:
         self.state = state
         self.controller = controller
         self.res = {
-            0: {'asset': 'res_field', 'name': 'Field', 'thresh': 0.45},
-            1: {'asset': 'res_rocks', 'name': 'Rock', 'thresh': 0.45},
-            2: {'asset': 'res_ore', 'name': 'Ore', 'thresh': 0.45},
-            3: {'asset': 'res_wood', 'name': 'Wood', 'thresh': 0.6},
-            4: {'asset': 'res_gold', 'name': 'Gold', 'thresh': 0.5}
+            0: {'asset': ['res_field'], 'title': 'res_txt_f', 'name': 'Field', 'thresh': 0.45},
+            1: {'asset': ['res_rocks'], 'title': 'res_txt_r', 'name': 'Rock', 'thresh': 0.45},
+            2: {'asset': ['res_ore2', 'res_ore'], 'title': 'res_txt_o', 'name': 'Ore', 'thresh': 0.45},
+            3: {'asset': ['res_woods', 'res_woods2'], 'title': 'res_txt_w', 'name': 'Wood', 'thresh': 0.6},
+            4: {'asset': ['res_gold2', 'res_gold'], 'title': 'res_txt_g', 'name': 'Gold', 'thresh': 0.5}
         }
         self.current_resource = 0
+        self.moves = [
+            self.controller.move_left,
+            self.controller.move_up,
+            self.controller.move_right,
+            self.controller.move_right,
+            self.controller.move_down,
+            self.controller.move_down,
+            self.controller.move_left,
+            self.controller.move_left,
+            self.controller.move_left,
+            self.controller.move_up,
+            self.controller.move_up,
+            self.controller.move_up,
+            self.controller.move_right,
+            self.controller.move_right,
+            self.controller.move_right,
+            self.controller.move_right
+        ]
 
     def start_gather(self):
         time.sleep(1.25)
@@ -36,19 +55,35 @@ class Gather:
             return False
 
     def gather(self):
+        self.state.clean_state()
         self.state.to_kingdom()
         self.current_resource %= 5
-        util.log('Searching for: ' + self.res[self.current_resource]['name'])
-        if self.vision.is_visible(self.res[self.current_resource]['asset'], self.res[self.current_resource]['thresh']):
-
-            res_matches = self.vision.find_template(self.res[self.current_resource]['asset'],
-                                                    threshold=self.res[self.current_resource]['thresh'])
-
-            while len(res_matches[0]) > 0 and not self.vision.is_visible('army_status'):
-                res_matches = self.controller.click_object(res_matches, (15, 45))
-                util.log(self.res[self.current_resource]['name'] + ' gathering attempted.')
-                if self.start_gather():
-                    break
+        move = 0
+        res = self.res[self.current_resource]
+        self.vision.refresh_frame()
+        gathering = False
+        while move < 15 and not gathering:
+            util.log('Searching for: ' + res['name'])
+            for ass in res['asset']:
+                self.vision.refresh_frame()
+                match = self.vision.find_template(ass, max_v=True)
+                self.controller.click_object(match, offset=(35, 45))
+                time.sleep(1.25)
+                self.vision.refresh_frame()
+                if self.vision.is_visible(res['title'], threshold=0.7) and \
+                        self.vision.is_visible('res_gather', threshold=0.8):
+                    self.controller.click_point(statics.gather['gather'])
+                    self.controller.click_point(statics.gather['assemble'])
+                    self.controller.click_point(statics.gather['start'])
+                    gathering = True
+                    util.log('Starting gathering: ' + res['name'])
+                else:
+                    self.state.clean_state()
+                    time.sleep(1)
+            if not gathering:
+                self.moves[move]()
+                move += 1
 
         if self.current_resource < 5:
             self.current_resource += 1
+        self.vision.refresh_frame()

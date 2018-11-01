@@ -9,52 +9,60 @@ class Vision:
     def __init__(self, window):
         self.assets = 'assets/img/'
         self.static_templates = {
-            'amt_wood': self.asset('amt_wood'),
-            'help': self.asset('help'),
-            'res_field': self.asset('res_field'),
-            'res_ore': self.asset('res_ore'),
-            'res_wood': self.asset('res_wood'),
-            'res_gold': self.asset('res_gold'),
-            'res_rocks': self.asset('res_rocks'),
-            'gather_gather': self.asset('gather_gather'),
-            'army_status': self.asset('army_status'),
-            'free_chest': self.asset('free_chest'),
-            'free_chest_5x': self.asset('free_chest_5x'),
-            'free_chest_claim': self.asset('free_chest_claim'),
-            'free_speedup': self.asset('free_speedup'),
-            'gather_auto_ass': self.asset('gather_auto_ass'),
-            'gather_start': self.asset('gather_start'),
-            'guild': self.asset('guild'),
-            'kingdom': self.asset('kingdom'),
-            'quest': self.asset('quest'),
-            'quest_admin': self.asset('quest_admin'),
-            'quest_collect': self.asset('quest_collect'),
-            'quest_guild': self.asset('quest_guild'),
-            'quest_has_completed': self.asset('quest_has_completed'),
-            'quest_has_quests': self.asset('quest_has_quests'),
-            'quest_start': self.asset('quest_start'),
-            'quest_turf': self.asset('quest_turf'),
-            'quest_vip': self.asset('quest_vip'),
-            'quest_vip_lock': self.asset('quest_vip_lock'),
-            'screen_close': self.asset('screen_close'),
-            'screen_close_level_up': self.asset('screen_close_level_up'),
-            'screen_close_main': self.asset('screen_close_main'),
-            'turf': self.asset('turf'),
-            'cr_none': self.asset('cr_none'),
-            'cr_upgrade': self.asset('cr_upgrade'),
-            'cr_no_research': self.asset('cr_no_research'),
-            'cr_go': self.asset('cr_go'),
-            'static_turf_statue': self.asset('static_turf_statue'),
-            'expand_ongoing': self.asset('expand_ongoing')
+            'chest_collect': self.asset('chest/collect'),
+            'chest_5x': self.asset('chest/5x'),
+            'chest_window': self.asset('chest/window'),
+            'etc_close': self.asset('etc/close'),
+            'dev_build': self.asset('dev/build'),
+            'dev_help': self.asset('dev/help'),
+            'dev_free': self.asset('dev/free'),
+            'dev_no_cr': self.asset('dev/no_cr'),
+            'dev_upgrade': self.asset('dev/upgrade'),
+            'dev_go': self.asset('dev/go'),
+            'dev_new': self.asset('dev/new'),
+            'etc_turf': self.asset('etc/turf'),
+            'etc_kingdom': self.asset('etc/kingdom'),
+            'guild_open': self.asset('guild/open'),
+            'hud_army': self.asset('hud/army'),
+            'hud_gift': self.asset('hud/gift'),
+            'quest_admin_comp': self.asset('quest/admin_comp'),
+            'quest_collect': self.asset('quest/collect'),
+            'quest_guild_comp': self.asset('quest/guild_comp'),
+            'quest_has_completed': self.asset('quest/has_completed'),
+            'quest_has_q': self.asset('quest/has_quests'),
+            'quest_start': self.asset('quest/start'),
+            'quest_turf_comp': self.asset('quest/turf_comp'),
+            'quest_vip_chest': self.asset('quest/vip_chest'),
+            'quest_vip_claim': self.asset('quest/vip_claim'),
+            'quest_vip_comp': self.asset('quest/vip_comp'),
+            'quest_window': self.asset('quest/window'),
+            'res_field': self.asset('res/field'),
+            'res_gold': self.asset('res/gold'),
+            'res_gold2': self.asset('res/gold2'),
+            'res_ore': self.asset('res/ore'),
+            'res_ore2': self.asset('res/ore2'),
+            'res_rocks': self.asset('res/rocks'),
+            'res_woods': self.asset('res/woods'),
+            'res_woods2': self.asset('res/woods2'),
+            'res_txt_f': self.asset('res/txt_field'),
+            'res_txt_g': self.asset('res/txt_gold'),
+            'res_txt_o': self.asset('res/txt_ore'),
+            'res_txt_r': self.asset('res/txt_rocks'),
+            'res_txt_w': self.asset('res/txt_woods'),
+            'res_gather': self.asset('res/gather'),
+            'turf_barracks': self.asset('turf/barracks'),
+            'turf_infirmary': self.asset('turf/infirmary'),
+            'turf_shelter': self.asset('turf/shelter'),
+            'turf_statue': self.asset('turf/statue')
         }
         self.templates = {k: cv2.imread(v, 0) for (k, v) in self.static_templates.items()}
-        self.monitor = {'top': 0, 'left': 0, 'width': 1920, 'height': 1080}
+        self.monitor = {'top': 0, 'left': 0, 'width': window.game['w'], 'height': window.game['h']}
         self.screen = mss()
         self.frame = None
         self.window = window
 
     def asset(self, img):
-        return self.assets + img + '.png'
+        return self.assets + img + '.JPG'
 
     def convert_rgb_to_bgr(self, img):
         return img[:, :, ::-1]
@@ -71,21 +79,17 @@ class Vision:
     def refresh_frame(self):
         self.frame = self.take_screenshot()
 
-    def match_template(self, img_grayscale, template, threshold=0.9):
-        canny = cv2.Canny(img_grayscale, 25, 250)
+    def match_template(self, img_grayscale, template, threshold=0.9, max_v=False):
+        ret, canny = cv2.threshold(img_grayscale, 150, 255, cv2.THRESH_BINARY)
         res = cv2.matchTemplate(canny, template, cv2.TM_CCOEFF_NORMED)
-        # cv2.imwrite(str(time.time()) + '.png', canny)
-        matches = np.where(res >= threshold)
-        i = 0
-        while i < len(matches[0]):
-            if matches[1][i] < self.window.game['x1'] or matches[1][i] > self.window.game['x2'] or \
-                    matches[0][i] < self.window.game['y1'] or matches[0][i] > self.window.game['y2']:
-                matches = np.array([np.delete(matches[0], i), np.delete(matches[1], i)])
-            else:
-                i += 1
+        if not max_v:
+            matches = np.where(res >= threshold)
+        else:
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            matches = ([max_loc[1]], [max_loc[0]])
         return np.array([np.asarray(matches[0]), np.asarray(matches[1])])
 
-    def find_template(self, name, image=None, threshold=0.9):
+    def find_template(self, name, image=None, threshold=0.9, max_v=False):
         if image is None:
             if self.frame is None:
                 self.refresh_frame()
@@ -95,7 +99,8 @@ class Vision:
         return self.match_template(
             image,
             self.templates[name],
-            threshold
+            threshold,
+            max_v
         )
 
     def scaled_find_template(self, name, image=None, threshold=0.9, scales=[1.0, 0.9, 1.1]):

@@ -14,7 +14,9 @@ class Window:
             'x2': self.window[2],
             'y2': self.window[3],
             'w': self.window[2] - self.window[0],
-            'h': self.window[3] - self.window[1]
+            'h': self.window[3] - self.window[1],
+            'midx': int(self.window[2] / 2),
+            'midy': int(self.window[3] / 2)
         }
 
     def isRealWindow(self, hWnd):
